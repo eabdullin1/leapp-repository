@@ -87,6 +87,8 @@ pipeline {
                                             label: 'Install the elevate-release-latest rpm packages for EL7'
                                         sh script: "vagrant ssh $targetDistro.vmName -c \"sudo wget https://build.almalinux.org/pulp/content/copr/eabdullin1-leapp-data-internal-centos7-x86_64-dr/config.repo -O /etc/yum.repos.d/internal-leapp.repo\"",
                                             label: 'Add pulp repository'
+                                        sh script: "vagrant ssh $targetDistro.vmName -c \"sudo sed -i 's|enabled=1|enabled=1\\npriority=80|' /etc/yum.repos.d/internal-leapp.repo\"",
+                                            label: 'Set priority for pulp repository'
                                         sh script: "vagrant ssh $targetDistro.vmName -c \"sudo yum install -y leapp-upgrade\"",
                                             label: 'Install the leap rpm package'
                                         sh script: "vagrant ssh $targetDistro.vmName -c \"sudo yum install -y $targetDistro.leappData\"",

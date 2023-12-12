@@ -11,7 +11,7 @@ pipeline {
     }
     parameters {
         // choice(name: 'TARGET_DISTRO_FILTER', choices: ['almalinux-9', 'centos-stream-9', 'eurolinux-9', 'rocky-9', 'all'], description: 'Select a target distro or all for ELevation')
-        choice(name: 'TARGET_DISTRO_FILTER', choices: ['almalinux-9', 'rocky-9', 'eurolinux-9', 'all'], description: 'Select a target distro or all for ELevation')
+        choice(name: 'TARGET_DISTRO_FILTER', choices: ['almalinux-9', 'rocky-9', 'all'], description: 'Select a target distro or all for ELevation')
         choice(name: 'CONF_FILTER', choices: ['minimal', 'docker-ce'], description: 'Select a configuration')
         string(name: 'RETRY', defaultValue: '3', description: 'Input count of retry', trim: true)
         string(name: 'TIMEOUT', defaultValue: '60', description: 'Input timeout value in minutes', trim: true)
@@ -74,7 +74,7 @@ pipeline {
                     axis {
                         name 'TARGET_DISTRO'
                         // values 'almalinux-9', 'centos-stream-9', 'eurolinux-9', 'rocky-9'
-                        values 'almalinux-9', 'rocky-9', 'eurolinux-9'
+                        values 'almalinux-9', 'rocky-9'
                     }
                 }
                 stages {
@@ -91,6 +91,8 @@ pipeline {
                                             label: 'Install wget'
                                         sh script: "vagrant ssh $targetDistro.vmName -c \"sudo wget https://build.almalinux.org/pulp/content/copr/eabdullin1-leapp-data-internal-almalinux-8-x86_64-dr/config.repo -O /etc/yum.repos.d/internal-leapp.repo\"",
                                             label: 'Add pulp repository'
+                                        sh script: "vagrant ssh $targetDistro.vmName -c \"sudo sed -i '4 a priority=80' /etc/yum.repos.d/internal-leapp.repo\"",
+                                            label: 'Set priority for pulp repository'
                                         sh script: "vagrant ssh $targetDistro.vmName -c \"sudo dnf install -y leapp-upgrade\"",
                                             label: 'Install the leap rpm package'
                                         sh script: "vagrant ssh $targetDistro.vmName -c \"sudo dnf install -y $targetDistro.leappData\"",
@@ -196,15 +198,15 @@ def targetDistroSpec(distro) {
                 leappData: ldata
             ]
             break
-        case 'eurolinux-9':
-            vm = 'eurolinux_9'
-            ldata = 'leapp-data-eurolinux'
+        // case 'eurolinux-9':
+        //     vm = 'eurolinux_9'
+        //     ldata = 'leapp-data-eurolinux'
 
-            spec = [
-                vmName: vm,
-                leappData: ldata
-            ]
-            break
+        //     spec = [
+        //         vmName: vm,
+        //         leappData: ldata
+        //     ]
+        //     break
         case 'rocky-9':
             vm = 'rocky_9'
             ldata = 'leapp-data-rocky'
